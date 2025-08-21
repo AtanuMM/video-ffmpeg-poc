@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  ffmpeg-api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    # volumes:
+    #   - ./watermark.png:/app/watermark.png:ro
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION:-ap-south-1}
+      - AWS_ACL=${AWS_ACL:-public-read}
+      - S3_BUCKET=${S3_BUCKET}
+      - S3_PREFIX=${S3_PREFIX:-processed/}
+      - S3_PRESIGN_EXPIRES=${S3_PRESIGN_EXPIRES:-900}
+      - S3_CREATE_BUCKET=${S3_CREATE_BUCKET:-true}
+      - S3_BLOCK_PUBLIC=${S3_BLOCK_PUBLIC:-false}
+    restart: unless-stopped
+
+  ffmpeg-api-dev:
+    build: .
+    profiles: ["dev"]
+    command: python -m uvicorn video_main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - .:/app

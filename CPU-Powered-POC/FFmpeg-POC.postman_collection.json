@@ -1,0 +1,150 @@
+{
+  "info": {
+    "name": "FFmpeg POC",
+    "_postman_id": "7f1f5a2b-1e2c-4c3a-9b2e-ffmpeg-poc-0001",
+    "description": "FastAPI + FFmpeg POC: upload a video, apply ops via query params (?op=...), default watermark, return processed file (HLS returns a ZIP). Set `file` in form-data for each request.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Health check → should return 'ok'."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /video/process — Generic (edit ops in URL)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/video/process?op=resize:width=1280,height=-2&op=crf:value=23&op=preset:value=veryfast&op=format:type=mp4",
+          "host": ["{{baseUrl}}"],
+          "path": ["video", "process"],
+          "query": [
+            { "key": "op", "value": "resize:width=1280,height=-2" },
+            { "key": "op", "value": "crf:value=23" },
+            { "key": "op", "value": "preset:value=veryfast" },
+            { "key": "op", "value": "format:type=mp4" }
+          ]
+        },
+        "description": "Generic template. Choose a local file for `file` and tweak the `op` query params."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /video/process — MP4 transcode (H.264/AAC)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/video/process?op=crf:value=23&op=preset:value=veryfast&op=format:type=mp4",
+          "host": ["{{baseUrl}}"],
+          "path": ["video", "process"],
+          "query": [
+            { "key": "op", "value": "crf:value=23" },
+            { "key": "op", "value": "preset:value=veryfast" },
+            { "key": "op", "value": "format:type=mp4" }
+          ]
+        },
+        "description": "Re-encode to MP4 (H.264/AAC) with CRF and preset. Output filename returned by server."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /video/process — WebM VP9 (resize 1280w, 30fps)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/video/process?op=resize:width=1280,height=-2&op=fps:value=30&op=format:type=webm",
+          "host": ["{{baseUrl}}"],
+          "path": ["video", "process"],
+          "query": [
+            { "key": "op", "value": "resize:width=1280,height=-2" },
+            { "key": "op", "value": "fps:value=30" },
+            { "key": "op", "value": "format:type=webm" }
+          ]
+        },
+        "description": "Transcode to WebM (VP9/Opus), resize keeping aspect (height = -2), set 30 fps."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /video/process — Thumbnail PNG @ 5s (no audio)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/video/process?op=audio:remove=true&op=thumbnail:at=5",
+          "host": ["{{baseUrl}}"],
+          "path": ["video", "process"],
+          "query": [
+            { "key": "op", "value": "audio:remove=true" },
+            { "key": "op", "value": "thumbnail:at=5" }
+          ]
+        },
+        "description": "Extract a single PNG frame at 5 seconds. Output filename ends with .png."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /video/process — HLS (ZIP of playlist + segments)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/video/process?op=format:type=hls",
+          "host": ["{{baseUrl}}"],
+          "path": ["video", "process"],
+          "query": [
+            { "key": "op", "value": "format:type=hls" }
+          ]
+        },
+        "description": "Produces an HLS set (m3u8 + .ts) and returns it as a ZIP."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" }
+  ]
+}
